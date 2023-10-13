@@ -8,6 +8,8 @@ C.addFrame(name="item1", parent="sink1") \
     .setRelativePosition([-.1, -.1, .52]) \
     .setColor([1, 0, 0])
     
+print("sink1 coordinates: ", C.frame("sink1").getPosition())
+print("item1 coordinates: ", C.frame("item1").getPosition())
 "C.watchFile(ry.raiPath('../rai-robotModels/objects/kitchen.g'))"
 C.view()
 time.sleep(500)

@@ -40,6 +40,9 @@ C.addFrame(name="item2", parent="tray") \
     .setColor([1, 1, 0])
 "##############State 2##############"
 
+print("sink1 coordinates: ", C.frame("sink1").getPosition())
+print("table1 coordinates: ", C.frame("table1").getPosition())
+print("item1 coordinates: ", C.frame("item1").getPosition())
 "C.watchFile(ry.raiPath('../rai-robotModels/objects/kitchen.g'))"
 C.view()
 time.sleep(500)
