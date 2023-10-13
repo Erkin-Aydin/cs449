@@ -1,4 +1,4 @@
-zero: { X:"T t(0 0 0) d(180 0 0 1)" shape:sphere mass=1 size=[0. 0. .6 .05] }
+zero: { X:"T t(0 0 0) d(180 0 0 1)" shape:sphere mass=1 size=[0. 0. .6 .10] }
 link1: { shape:capsule mass=1 size=[0 0 1 .05] color: [0 0 1]}
 link2: { shape: capsule mass=1 size=[0 0 1 .05] color: [1 0 0]}
 endeffector: { shape:sphere mass=1 size=[0. 0. .6 .05] color: [0 1 0]}
