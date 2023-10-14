@@ -9,19 +9,19 @@ target = C.frame("target")
 joint_angles = 2 * np.pi * np.random.rand(3)
 
 def forward_kinematics(q):
-    q0 = np.pi * 2 - q[0]
-    q1 = np.pi * 2 - q[1];
+    q0 = np.pi / 2 - q[0]
+    q1 =  np.pi / 2 - q[0] - q[1];
     print(q0)
     print(q1)
-    y = np.cos(q0) + np.cos(q0 + q1);
-    z = np.sin(q0) + np.sin(q0 + q1);
+    print(q[2])
+    y = np.cos(q0) + np.cos(q1);
+    z = np.sin(q0) + np.sin(q1);
     return np.array([0, y, z])
 pos_target = forward_kinematics(joint_angles)
 target.setPosition(pos_target)
 C.setJointState(joint_angles)
 C.view()
 time.sleep(10)
-#Restarting the joint configuration for the next run
 q = np.zeros(C.getJointDimension())
 C.setJointState(q)
 
