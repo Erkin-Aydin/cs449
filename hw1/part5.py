@@ -29,7 +29,6 @@ komo.addObjective([1], ry.FS.positionDiff, ['endeffector', 'item2'], ry.OT.eq, [
 komo.addObjective([2], ry.FS.positionDiff, ['endeffector', 'tray'], ry.OT.eq, [1e1])
 komo.addObjective([3], ry.FS.positionDiff, ['endeffector', 'item1'], ry.OT.eq, [1e1])
 
-
 ret = ry.NLP_Solver(komo.nlp(), verbose=0 ) .solve()
 print(ret)
 q = komo.getPath()
