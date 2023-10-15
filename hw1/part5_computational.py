@@ -3,10 +3,7 @@ import time
 import numpy as np
 C = ry.Config()
 C.addFile(ry.raiPath('../rai-robotModels/objects/kitchen.g'))
-K = ry.Config()
-K.addFile(ry.raiPath('../rai-robotModels/objects/kitchen.g'))
 C.addFile('part5.g')
-K.addFile('part5.g')
 
 C.addFrame(name="item1", parent="sink1") \
     .setShape(ry.ST.ssBox, size=[0.1, 0.1, 0.25, 0.02]) \
@@ -24,30 +21,28 @@ C.addFrame(name="tray", parent="stove1") \
     .setColor([0, 1, 0]) \
     .setRelativeQuaternion([.45, 0, 0, 1])
 
-n = K.getJointDimension()
-q = K.getJointState()
+n = C.getJointDimension()
+q = C.getJointState()
 w = 1e-4
 W = w * np.identity(n) # W is equal the ID_n matrix times scalar w
 input("initial posture, press Enter to continue...")
-y_target = [0.0, 0.7, 0]
-for i in range(10):
+y_target = C.frame("item2").getPosition()
+for i in range(20):
     # 1st task
-    F = K.feature(ry.FS.position, ["endeffector"])
-    y, J = F.eval(K)
+    F = C.feature(ry.FS.position, ["endeffector"])
+    y, J = F.eval(C)
     # compute joint updates
     q += np.linalg.inv(J.T @ J + W) @ J.T @ (y_target - y)
     # NOTATION: J.T is the transpose of J; @ is matrix multiplication (dot product)
     # sets joint angles AND computes all frames AND updates display
-    K.setJointState(q)
+    C.setJointState(q)
     # optional: pause and watch OpenGL
-    K.view()
+    C.view()
+    if(i == 4):
+        y_target = C.frame("item1").getPosition()
+        q = C.getJointState()
+    elif(i == 6):
+        y_target = C.frame("tray").getPosition()
+        q = C.getJointState()
     input("Press Enter to continue...")
-
-
-  
-for t in range(q.shape[0]):
-    C.setJointState(q[t])
-    C.view(False, f'waypoint {t}')
-    time.sleep(0.2)
-
 
