@@ -33,8 +33,7 @@ ret = ry.NLP_Solver(komo.nlp(), verbose=0 ) .solve()
 print(ret)
 q = komo.getPath()
 print(q)
-
-    
+  
 for t in range(q.shape[0]):
     C.setJointState(q[t])
     C.view(False, f'waypoint {t}')
