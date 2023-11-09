@@ -4,6 +4,7 @@ import time
 
 C = ry.Config()
 C.addFile('cargobot_base.g')
+C.addFile('cargo.g')
 C.addFile('maze.g')
 
 qHome = C.getJointState()
@@ -35,11 +36,6 @@ for i in range(0, 2):
     print("rettttt: ", ret)
     path = ret.x
     print("path size:", path.shape[0])
-    # display the path
-    for t in range(0, path.shape[0] - 1):
-        C.setJointState(path[t])
-        C.view()
-        time.sleep(0.002)
 
 C.setJointState(qHome)
 komo2 = ry.KOMO(C, 1, path.shape[0], 2, True)
@@ -60,7 +56,7 @@ print('last path:', q)
 # display the path
 for i in range(0, q.shape[0] - 1):
     C.setJointState(q[i])
-    C.view(False, f'waypoints{i}')
+    C.view()
     time.sleep(0.02)
 
 C.view()
