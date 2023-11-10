@@ -8,6 +8,9 @@ cargo_handle_r(cargo): { Q: "t(-0.1 0 0.225) d(0 0 0 1)", shape: capsule, size: 
 cargo_handle(cargo): { Q: "t(0.0 0 0.25) d(-90 0 1 0)", shape: capsule, size: [.2 .012], color: [1 0 0], mass: .1, contact: 1 }
 
 #Checkpoints add checkpoints if u want
-cp1: {X: "t(4 -3 0.48) d(-90 0 1 0)", shape: marker,size: [.1]}  #Checkpoint_1
-cp1: {X: "t(-2 3. 0.48) d(-90 0 1 0)", shape: marker,size: [.1]}  #Checkpoint_2
+cp1: {X: "t(0 -3 0.48) d(-90 0 1 0)", shape: marker,size: [.1]}  #Checkpoint_1todo
+cp2: {X: "t(4 -3 0.48) d(-90 0 1 0)", shape: marker,size: [.1]}  #Checkpoint_1
+cp3: {X: "t(4 3 0.48) d(-90 0 1 0)", shape: marker,size: [.1]}  #Checkpoint_1todo
+cp4: {X: "t(-2 3. 0.48) d(-90 0 1 0)", shape: marker,size: [.1]}  #Checkpoint_2
+cp5: {X: "t(-2 -3 0.48) d(-90 0 1 0)", shape: marker,size: [.1]}  #Checkpoint_1todo
 final: {X: "t(-4.5 -3. 0.48) d(-90 0 1 0)", shape: marker,size: [.1]} #Final_Destination
