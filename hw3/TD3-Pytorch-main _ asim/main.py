@@ -59,7 +59,7 @@ def main():
           f'max_a:{opt.max_action}  min_a:{env.action_space.low[0]}  max_e_steps:{opt.max_e_steps}')
 
     # Seed Everything
-    opt.seed = 6
+    opt.seed = 1
     env_seed = opt.seed
     np.random.seed(opt.seed)
     torch.manual_seed(opt.seed)

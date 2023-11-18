@@ -14,14 +14,14 @@ class Hyperparameters:
         self.render = False  # Render or Not 
         self.seed = 0  # random seed
         self.update_every = 50  # training frequency
-        self.Max_train_steps = int(6e4)  # Max training steps
+        self.Max_train_steps = int(2e5)  # Max training steps
         self.save_interval = int(1e5)  # Model saving interval, in steps
         self.delay_freq = 1  # Delayed frequency for Actor and Target Net
         self.gamma = 0.99  # Discounted Factor The discount factor gamma is a number between 0 and 1. If gamma is close to 0, the agent will mostly consider only immediate rewards.
         self.net_width = 256  # Hidden net width, s_dim-400-300-a_dim
         self.a_lr = 1e-4  # Learning rate of actor
         self.c_lr = 1e-4  # Learning rate of critic
-        self.batch_size = 256  # batch_size of training
+        self.batch_size = 128  # batch_size of training
         self.explore_noise = 0.15  # exploring noise when interacting
         self.explore_noise_decay = 0.998  # Decay rate of explore noise
 
@@ -56,7 +56,7 @@ def main():
           f'max_a:{opt.max_action}  min_a:{env.action_space.low[0]}  max_e_steps:{opt.max_e_steps}')
 
     # Seed Everything
-    opt.seed = 6
+    opt.seed = 42
     env_seed = opt.seed
     np.random.seed(opt.seed)
     torch.manual_seed(opt.seed)
@@ -69,7 +69,9 @@ def main():
  
     agent = TD3_agent(**vars(opt)) # var: transfer argparse to dictionary
     
-
+    i = 0;
+    total = 0;
+    avg = 0;
     if opt.render:
         while True:
             score = evaluate_policy(env, agent, turns=1)
@@ -78,7 +80,7 @@ def main():
         total_steps = 0
         while total_steps < opt.Max_train_steps:
             s, info = env.reset(seed=env_seed)  # Do not use opt.seed directly, or it can overfit to opt.seed
-            env_seed += 1
+            #env_seed += 1
             done = False
 
             '''Interact & trian'''
@@ -100,10 +102,13 @@ def main():
                         agent.train()
 
                 '''5000 test for 1 episode'''
-                if total_steps % 5000 == 0:
+                if total_steps % 1000 == 0:
                     agent.explore_noise *= opt.explore_noise_decay
                     ep_r = evaluate_policy(eval_env, agent, turns=3)
-                    print(f'EnvName:{opt.Env_name}, Steps: {int(total_steps/1000)}k, Episode Reward:{ep_r}')
+                    i = i + 1
+                    total = total + ep_r
+                    avg = total / i
+                    print(f'Episode: {int(total_steps/1000)}, Episode Reward:{ep_r}, Avg:{avg}')
 
               
         env.close()
