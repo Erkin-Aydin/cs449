@@ -14,7 +14,7 @@ class Hyperparameters:
         self.render = False  # Render or Not 
         self.seed = 0  # random seed
         self.update_every = 50  # training frequency
-        self.Max_train_steps = int(2e5)  # Max training steps
+        self.Max_train_steps = int(3e5)  # Max training steps
         self.save_interval = int(1e5)  # Model saving interval, in steps
         self.delay_freq = 1  # Delayed frequency for Actor and Target Net
         self.gamma = 0.99  # Discounted Factor The discount factor gamma is a number between 0 and 1. If gamma is close to 0, the agent will mostly consider only immediate rewards.
@@ -56,7 +56,7 @@ def main():
           f'max_a:{opt.max_action}  min_a:{env.action_space.low[0]}  max_e_steps:{opt.max_e_steps}')
 
     # Seed Everything
-    opt.seed = 42
+    opt.seed = 6
     env_seed = opt.seed
     np.random.seed(opt.seed)
     torch.manual_seed(opt.seed)
@@ -80,7 +80,6 @@ def main():
         total_steps = 0
         while total_steps < opt.Max_train_steps:
             s, info = env.reset(seed=env_seed)  # Do not use opt.seed directly, or it can overfit to opt.seed
-            #env_seed += 1
             done = False
 
             '''Interact & trian'''
@@ -103,12 +102,13 @@ def main():
 
                 '''5000 test for 1 episode'''
                 if total_steps % 1000 == 0:
+                    env_seed += 100
                     agent.explore_noise *= opt.explore_noise_decay
                     ep_r = evaluate_policy(eval_env, agent, turns=3)
                     i = i + 1
                     total = total + ep_r
                     avg = total / i
-                    print(f'Episode: {int(total_steps/1000)}, Episode Reward:{ep_r}, Avg:{avg}')
+                    print(f'Episode: {int(total_steps/1000)}, Episode Reward:{ep_r}')
 
               
         env.close()
