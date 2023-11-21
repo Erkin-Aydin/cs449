@@ -15,38 +15,39 @@ class DeepQNetwork(nn.Module):
         
         self.n_actions = n_actions #Output space
 
-        self.fc1_dims = nn.Linear(*self.input_dims, self.fc1_dims)  #layer1
-        self.fc2_dims = nn.Linear(self.fc1_dims, self.fc2_dims)     #layer2
-        self.fc3_dims = nn.Linear(self.fc2_dims, self.n_actions)    #layer3
+        self.fc1 = nn.Linear(*self.input_dims, self.fc1_dims)  #layer1
+        self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)     #layer2
+        self.fc3 = nn.Linear(self.fc2_dims, self.n_actions)    #layer3
 
-        self.optimizer = optim.Adam(self.parameters(), lr=self.lr)
+        self.optimizer = optim.Adam(self.parameters(), lr=lr)
         self.loss = nn.MSELoss()
 
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') #selecting gpu if available
         self.to(self.device) #moving model to selected device.
 
     def forward(self, state):
-        x = F.relu(self.fc1_dims(state)) #computing the output of the first layer
-        x = F.relu(self.fc2_dims(x))     #computing the output of the second layer
-        actions = self.fc3_dims(x)       #computing the output of the third layer, that is, the output of the network
+        x = F.relu(self.fc1(state)) #computing the output of the first layer
+        x = F.relu(self.fc2(x))     #computing the output of the second layer
+        actions = self.fc3(x)       #computing the output of the third layer, that is, the output of the network
 
         return actions
     
 class Agent():
     def __init__(self, gamma, epsilon, lr, input_dims, batch_size, n_actions, 
                  max_mem_size=1000000,  #maximum memory size, I do not know anything else either, we shall f'in see, TO BE UNDERSTOOD.
-                 eps_end=0.01,          #minimum epsilon value, TO BE UNDERSTOOD
+                 eps_end=0.05,          #minimum epsilon value, TO BE UNDERSTOOD
                  eps_dec=5e-4):         #epsilon decay value, TO BE UNDERSTOOD
-        self.gamma = gamma              #TF is this? TO BE UNDERSTOOD
-        self.epsilon = epsilon          #TF is this? TO BE UNDERSTOOD
+        self.gamma = gamma
+        self.epsilon = epsilon
+        self.eps_min = eps_end
+        self.eps_dec = eps_dec
         self.lr = lr
-        self.input_dims = input_dims
-        self.batch_size = batch_size    #TF is this? TO BE UNDERSTOOD
-        self.n_actions = n_actions
+        self.action_space = [i for i in range(n_actions)]
         self.mem_size = max_mem_size
-        
-        self.action_space = [i for i in range(self.n_actions)] #action space
-        self.mem_cntr = 0 #memory counter, to keep track of the position of the first available memory
+        self.batch_size = batch_size
+        self.mem_cntr = 0   #memory counter, to keep track of the position of the first available memory
+        self.iter_cntr = 0
+        self.replace_target = 100
 
         self.Q_eval = DeepQNetwork(self.lr, n_actions=n_actions, input_dims=input_dims, fc1_dims=256, fc2_dims=256) #Q_eval is the main network
 
@@ -55,7 +56,7 @@ class Agent():
         self.new_state_memory = np.zeros((self.mem_size, *input_dims), dtype=np.float32)
         self.action_memory = np.zeros(self.mem_size, dtype=np.int32)    #memory for action
         self.reward_memory = np.zeros(self.mem_size, dtype=np.float32)  #memory for reward
-        self.terminal_memory = np.zeros(self.mem_size, dtype=np.bool)   #memory for terminal state, future value of terminal state is 0
+        self.terminal_memory = np.zeros(self.mem_size, dtype=bool)   #memory for terminal state, future value of terminal state is 0
 
     def store_transition(self, state, action, reward, state_, done):
         index = self.mem_cntr % self.mem_size # calculating the index of the current memory to store the transition
@@ -70,7 +71,7 @@ class Agent():
     def choose_action(self, observation):
         if np.random.random() > self.epsilon:#if so, we want to figure out the best "known" action
             #[] is used to convert the observation to a list
-            state = torch.tensor([observation]).to(self.Q_eval.device) #sending variables we want to use to the device
+            state = torch.tensor(np.array(observation)).to(self.Q_eval.device) #sending variables we want to use to the device
             actions = self.Q_eval.forward(state)    #passing the state to DQN, getting the action values, that is, the output of the network
             action = torch.argmax(actions).item()   #selecting the action with the highest value for that state
         else:
@@ -87,7 +88,7 @@ class Agent():
         self.Q_eval.optimizer.zero_grad()
         max_mem = min(self.mem_cntr, self.mem_size)                         #we get upto the last filled memory
         batch = np.random.choice(max_mem, self.batch_size, replace=False)   #wtf
-        batch_index = np.arrange(self.batch_size, dtype=np.int32)           #calculating the batch index...
+        batch_index = np.arange(self.batch_size, dtype=np.int32)           #calculating the batch index...
        
         state_batch = torch.tensor(self.state_memory[batch]).to(self.Q_eval.device)
         new_state_batch = torch.tensor(self.new_state_memory[batch]).to(self.Q_eval.device)

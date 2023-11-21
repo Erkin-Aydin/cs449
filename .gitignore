@@ -2,3 +2,7 @@ add
 z.log.global
 hw1/cs449_hw1_10.zip
 hw1/z.log.global
+dqn-pytorch-tutorial/.vscode/settings.json
+dqn-pytorch-tutorial/__pycache__/DQN.cpython-310.pyc
+dqn-pytorch-tutorial/__pycache__/utils.cpython-310.pyc
+dqn-pytorch-tutorial/lunar_lander.png
