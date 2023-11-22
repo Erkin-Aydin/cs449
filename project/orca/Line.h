@@ -25,7 +25,7 @@ namespace ORCA {
         public:
 
         /**
-         * @brief constructor for a directed line.
+         * @brief constructor for a directed line. by default, the point is (0, 0) and the direction is (1, 0)
         */
         Line();
 
