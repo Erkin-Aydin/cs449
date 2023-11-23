@@ -1,8 +1,17 @@
 import gymnasium as gym
-import numpy as np
+from robotic import ry
 import rvo2
+import numpy as np
+import time
 
 sim = rvo2.PyRVOSimulator(1/60., 1.5, 5, 1.5, 2, 0.4, 2)
+C = ry.Config()
+C.addFile('world.g')
+
+qHome = C.getJointState()
+C.setJointState(qHome)
+C.view()
+#time.sleep(500)
 
 # Pass either just the position (the other parameters then use
 # the default values passed to the PyRVOSimulator constructor),
