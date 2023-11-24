@@ -12,16 +12,24 @@ import pygame
 
 N_AGENTS = 4
 RADIUS = .3
-SPEED = 0.1
+SPEED = 1
 
 initial_positions = [(2.0, 2.0), (2.0 -2.0), (-2.0, -2.0), (-2.0, 2.0)]
 agents = []
-
-theta = 2 * pi * 0 / N_AGENTS
-x = RADIUS * array((cos(theta), sin(theta))) #+ random.uniform(-1, 1)
-vel = normalized(-x) * SPEED
-#                   position          initial vel. radius, max speed, preferred vel.
-agents.append(Agent(initial_positions[i], (0., 0.), 1., SPEED, vel))
+for i in range(N_AGENTS):
+    theta = 2 * pi * i / N_AGENTS
+    x = RADIUS * array((cos(theta), sin(theta))) #+ random.uniform(-1, 1)
+    vel = normalized(-x) * SPEED
+    if(i == 0):
+        vel = (-0.5, -0.5)
+    elif(i == 1):
+        vel = (-0.5, 0.5)
+    elif(i == 2):
+        vel = (0.5, 0.5)
+    elif(i == 3):
+        vel = (0.5, -0.5)
+    #                   position          initial vel. radius, max speed, preferred vel.
+    agents.append(Agent(initial_positions[i], vel, 0.3, SPEED, vel))
 
 C = ry.Config()
 C.addFile('world.g')
@@ -63,7 +71,7 @@ accum = 0
 all_lines = [[]] * len(agents)
 while running:
     accum += clock.tick(FPS)
-    time.sleep(1)
+    time.sleep(0.1)
     while accum >= dt * 1000:
         accum -= dt * 1000
 
