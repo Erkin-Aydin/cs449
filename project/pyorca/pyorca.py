@@ -101,30 +101,18 @@ def get_avoidance_velocity(agent, collider, t, dt):
     x_len_sq = norm_sq(x)
 
     if x_len_sq >= r * r:
-        # We need to decide whether to project onto the disk truncating the VO
-        # or onto the sides.
-        #
-        # The center of the truncating disk doesn't mark the line between
-        # projecting onto the sides or the disk, since the sides are not
-        # parallel to the displacement. We need to bring it a bit closer. How
-        # much closer can be worked out by similar triangles. It works out
-        # that the new point is at x/t cos(theta)^2, where theta is the angle
-        # of the aperture (so sin^2(theta) = (r/||x||)^2).
+        
         adjusted_center = x/t * (1 - (r*r)/x_len_sq)
 
         if dot(v - adjusted_center, adjusted_center) < 0:
-            # v lies in the front part of the cone
-            # print("front")
-            # print("front", adjusted_center, x_len_sq, r, x, t)
+
             w = v - x/t
             u = normalized(w) * r/t - w
             n = normalized(w)
-        else: # v lies in the rest of the cone
-            # print("sides")
-            # Rotate x in the direction of v, to make it a side of the cone.
-            # Then project v onto that, and calculate the difference.
+        else: 
+
             leg_len = sqrt(x_len_sq - r*r)
-            # The sign of the sine determines which side to project on.
+            
             sine = copysign(r, det((v, x)))
             rot = array(
                 ((leg_len, sine),
@@ -132,20 +120,15 @@ def get_avoidance_velocity(agent, collider, t, dt):
             rotated_x = rot.dot(x) / x_len_sq
             n = perp(rotated_x)
             if sine < 0:
-                # Need to flip the direction of the line to make the
-                # half-plane point out of the cone.
                 n = -n
-            # print("rotated_x=%s" % rotated_x)
+            
             u = rotated_x * dot(v, rotated_x) - v
-            # print("u=%s" % u)
+
     else:
-        # We're already intersecting. Pick the closest velocity to our
-        # velocity that will get us out of the collision within the next
-        # timestep.
-        # print("intersecting")
         w = v - x/dt
         u = normalized(w) * r/dt - w
         n = normalized(w)
+        
     return u, n
 
 def norm_sq(x):

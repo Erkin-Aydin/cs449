@@ -12,28 +12,28 @@ import pygame
 
 N_AGENTS = 4
 RADIUS = .3
-SPEED = 1
+SPEED = 0.5
 
-initial_positions = [(2.0, 2.0), (2.0 -2.0), (-2.0, -2.0), (-2.0, 2.0)]
+initial_positions = [(2.0, 2.0), (2.0, -2.0), (-2.0, -2.0), (-2.0, 2.0)]
 agents = []
 for i in range(N_AGENTS):
-    theta = 2 * pi * i / N_AGENTS
-    x = RADIUS * array((cos(theta), sin(theta))) #+ random.uniform(-1, 1)
-    vel = normalized(-x) * SPEED
+
+    vel = 0
     if(i == 0):
-        vel = (-0.5, -0.5)
+        vel = (-0.55, -0.55)
     elif(i == 1):
-        vel = (-0.5, 0.5)
+        vel = (-0.55, 0.55)
     elif(i == 2):
-        vel = (0.5, 0.5)
+        vel = (0.55, 0.55)
     elif(i == 3):
-        vel = (0.5, -0.5)
+        vel = (0.55, -0.55)
     #                   position          initial vel. radius, max speed, preferred vel.
-    agents.append(Agent(initial_positions[i], vel, 0.3, SPEED, vel))
+    pref_vel = array(vel) * 2
+    agents.append(Agent(initial_positions[i], vel, .3, SPEED,  pref_vel))
 
 C = ry.Config()
 C.addFile('world.g')
-
+C.view()
 qHome = C.getJointState()
 C.setJointState(qHome)
 
@@ -98,24 +98,16 @@ while running:
     """
     # Draw ORCA line and normal to ORCA line
     #TODO
-    """
+    
     for line in all_lines[0]:
         alpha = agents[0].position + line.point + perp(line.direction) * 100
         beta = agents[0].position + line.point + perp(line.direction) * -100
         # Update Rai configuration instead of pygame drawing
-        C.delFrame('line_alpha')
-        C.addFrame('line_alpha', alpha)
-        C.delFrame('line_beta')
-        C.addFrame('line_beta', beta)
 
         gamma = agents[0].position + line.point
         delta = agents[0].position + line.point + line.direction
         # Update Rai configuration instead of pygame drawing
-        C.delFrame('line_gamma')
-        C.addFrame('line_gamma', gamma)
-        C.delFrame('line_delta')
-        C.addFrame('line_delta', delta)
-    """
+    
     C.view()
     #TODO
     #pygame.display.flip()
