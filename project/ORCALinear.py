@@ -1,22 +1,22 @@
 import math
 
 class Agent:
-    def __init__(self, sim):
-        self.maxNeighbors = 0
-        self.maxSpeed = 0.0
-        self.neighborDist = 0.0
-        self.radius = 0.0
+    def __init__(self, sim, id, position, neighborDist, maxNeighbors, timeHorizon, timeHorizonObst, radius, maxSpeed, velocity):
         self.sim = sim
-        self.timeHorizon = 0.0
-        self.timeHorizonObst = 0.0
-        self.id = 0
+        self.id = id
+        self.position = position
+        self.neighborDist = neighborDist
+        self.maxNeighbors = maxNeighbors
+        self.timeHorizon = timeHorizon
+        self.timeHorizonObst = timeHorizonObst
+        self.radius = radius
+        self.maxSpeed = maxSpeed
+        self.velocity = velocity
+        self.prefVelocity = velocity #initially, they might be the same? I dunno lets try and see.
         self.agentNeighbors = []
         self.newVelocity = None
         self.obstacleNeighbors = []
         self.orcaLines = []
-        self.position = None
-        self.prefVelocity = None
-        self.velocity = None
 
     def computeNeighbors(self):
         self.obstacleNeighbors.clear()

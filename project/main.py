@@ -1,56 +1,120 @@
+import sys
+sys.path.append('./pyorca/')
+
 import gymnasium as gym
 from robotic import ry
-import rvo2
-import numpy as np
+from pyorca import Agent, get_avoidance_velocity, orca, normalized, perp
+from numpy import array, rint, linspace, pi, cos, sin
 import time
+import random
+import pygame
 
-sim = rvo2.PyRVOSimulator(1/60., 1.5, 5, 1.5, 2, 0.4, 2)
+
+N_AGENTS = 4
+RADIUS = .3
+SPEED = 0.1
+
+initial_positions = [(2.0, 2.0), (2.0 -2.0), (-2.0, -2.0), (-2.0, 2.0)]
+agents = []
+
+theta = 2 * pi * 0 / N_AGENTS
+x = RADIUS * array((cos(theta), sin(theta))) #+ random.uniform(-1, 1)
+vel = normalized(-x) * SPEED
+#                   position          initial vel. radius, max speed, preferred vel.
+agents.append(Agent(initial_positions[i], (0., 0.), 1., SPEED, vel))
+
 C = ry.Config()
 C.addFile('world.g')
 
 qHome = C.getJointState()
 C.setJointState(qHome)
-C.view()
-#time.sleep(500)
 
-# Pass either just the position (the other parameters then use
-# the default values passed to the PyRVOSimulator constructor),
-# or pass all available parameters.
-# Parameters: position, neighborDist, maxNeighbors, timeHorizon, timeHorizonObst, radius, maxSpeed, velocity
-a0 = sim.addAgent((2, 2), 1.0, 5, 1.5, 2, 0.4, 0.002, (-0.1, -0.1))
-a1 = sim.addAgent((2, -2), 1.0, 5, 1.5, 2, 0.4, 0.002, (-0.1, 0.1))
-a2 = sim.addAgent((-2, 2), 1.0, 5, 1.5, 2, 0.4, 0.002, (0.1, -0.1))
-a3 = sim.addAgent((-2, -2), 1.0, 5, 1.5, 2, 0.4, 0.002, (0.1, 0.1))
 
-# Obstacles are also supported. Adding coordinates of its corners.
-o1 = sim.addObstacle([(0.5, 0.5), (0.5, -0.5), (-0.5, -0.5), (-0.5, 0.5)])
-sim.processObstacles()
 
-#sets the preferred velocity for an agent.
-sim.setAgentPrefVelocity(a0, (-0.1, -0.1))
-sim.setAgentPrefVelocity(a1, (-0.1, 0.1))
-sim.setAgentPrefVelocity(a2, (0.1, -0.1))
-sim.setAgentPrefVelocity(a3, (0.1, 0.1))
+def draw_orca_circles(a, b):
+    for x in linspace(0, tau, 21):
+        if x == 0:
+            continue
+        #TODO
+        """
+        C.delFrame('circle' + str(x))
+        C.addFrame('circle' + str(x)) \
+            .setPosition([0, 0, .25]) \
+            .setShape(ry.ST.ssCylinder, size=[.5, .5, .5, .05]) \
+            .setColor([1, .5, 0]) \
+            .setMass(.1) \
+            .setContact(True)
+        print("dsfaf")
+        """
+        #pygame.draw.circle(screen, pygame.Color(0, 0, 255), rint((-(a.position - b.position) / x + a.position) * scale + O).astype(int), int(round((a.radius + b.radius) * scale / x)), 1)
+"""
+def draw_velocity(a):
+    #TODO
+    pygame.draw.line(screen, pygame.Color(0, 255, 255), rint(a.position * scale + O).astype(int), rint((a.position + a.velocity) * scale + O).astype(int), 1)
+    # pygame.draw.line(screen, pygame.Color(255, 0, 255), rint(a.position * scale + O).astype(int), rint((a.position + a.pref_velocity) * scale + O).astype(int), 1)
+"""
+FPS = 20
+dt = 1/FPS
+tau = 5
 
-a0.linearProgram3()
-print('Simulation has %i agents and %i obstacle vertices in it.' %
-      (sim.getNumAgents(), sim.getNumObstacleVertices()))
+clock = pygame.time.Clock()
+running = True
+accum = 0
+all_lines = [[]] * len(agents)
+while running:
+    accum += clock.tick(FPS)
+    time.sleep(1)
+    while accum >= dt * 1000:
+        accum -= dt * 1000
 
+        new_vels = [None] * len(agents)
+        for i, agent in enumerate(agents):
+            candidates = agents[:i] + agents[i + 1:]
+            # print(candidates)
+            new_vels[i], all_lines[i] = orca(agent, candidates, tau, dt)
+            # print(i, agent.velocity)
+
+        for i, agent in enumerate(agents):
+            agent.velocity = new_vels[i]
+            agent_str = 'a' + str(i)
+            agent.position = agent.position + agent.velocity * dt
+            C.setJointState([agent.position[0], agent.position[1], 0], [agent_str])
+    
+    for agent in agents[1:]:
+        draw_orca_circles(agents[0], agent)
+    """
+    for agent, color in zip(agents, itertools.cycle(colors)):
+        draw_agent(agent, color)
+        draw_velocity(agent)
+        # print(sqrt(norm_sq(agent.velocity)))
+    """
+    # Draw ORCA line and normal to ORCA line
+    #TODO
+    """
+    for line in all_lines[0]:
+        alpha = agents[0].position + line.point + perp(line.direction) * 100
+        beta = agents[0].position + line.point + perp(line.direction) * -100
+        # Update Rai configuration instead of pygame drawing
+        C.delFrame('line_alpha')
+        C.addFrame('line_alpha', alpha)
+        C.delFrame('line_beta')
+        C.addFrame('line_beta', beta)
+
+        gamma = agents[0].position + line.point
+        delta = agents[0].position + line.point + line.direction
+        # Update Rai configuration instead of pygame drawing
+        C.delFrame('line_gamma')
+        C.addFrame('line_gamma', gamma)
+        C.delFrame('line_delta')
+        C.addFrame('line_delta', delta)
+    """
+    C.view()
+    #TODO
+    #pygame.display.flip()
+    """
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+    """
 print('Running simulation')
 
-for step in range(20):
-    sim.doStep()
-
-    for agent_no in (a0, a1, a2, a3):
-        position = sim.getAgentPosition(agent_no)
-        velocity = sim.getAgentVelocity(agent_no)
-        position = [position[0], position[1], 0.0]
-        agent_str = 'a' + str(agent_no)
-        C.setJointState([position[0], position[1], position[2]], [agent_str])
-        print('(%5.3f, %5.3f) (%5.3f, %5.3f)' % (position[0], position[1], velocity[0], velocity[1]))
-        C.view()
-        time.sleep(0.5)
-    
-    positions = ['(%5.3f, %5.3f)' % sim.getAgentPosition(agent_no)
-                 for agent_no in (a0, a1, a2, a3)]
-    print('step=%2i  t=%.3f  %s' % (step, sim.getGlobalTime(), '  '.join(positions)))
