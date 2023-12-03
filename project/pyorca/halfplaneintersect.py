@@ -118,6 +118,9 @@ def line_halfplane_intersect(line, other_lines):
             if num < 0:
                 # The intersection of the half-planes is empty; there is no
                 # solution.
+                '''
+                TODO implement Relaxed ORCA here.
+                '''
                 raise InfeasibleError
             else:
                 # The *half-planes* intersect, but their lines don't cross, so

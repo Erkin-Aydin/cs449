@@ -45,6 +45,9 @@ class Agent(object):
         self.radius = radius
         self.max_speed = max_speed
         self.pref_velocity = array(pref_velocity)
+    
+    def updatePrefVelocity(self, pref_velocity):
+        self.pref_velocity = array(pref_velocity)
 
 
 def orca(agent, colliding_agents, t, dt):
