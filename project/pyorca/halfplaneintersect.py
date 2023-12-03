@@ -1,26 +1,6 @@
-# The MIT License (MIT)
-#
-# Copyright (c) 2013 Mak Nazecic-Andrlon
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to
-# deal in the Software without restriction, including without limitation the
-# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-# sell copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-# IN THE SOFTWARE.
-
-"""This module solves 2D linear programming using half-plane intersection."""
+"""This module solves 2D linear programming using half-plane intersection.
+IMPORTANT: For original implementation, please refer to https://github.com/Muon/pyorca
+"""
 
 from __future__ import division
 
@@ -99,18 +79,18 @@ def line_halfplane_intersect(line, other_lines):
     # "Right" is positive.
     left_dist = float("-inf")
     right_dist = float("inf")
+    M = 1000 # A sufficiently large number
+    slack_var = 0.00
     for prev_line in other_lines:
-        num1 = dot(prev_line.direction, line.point - prev_line.point)
-        den1 = det((line.direction, prev_line.direction))
-        # num2 = det((perp(prev_line.direction), line.point - prev_line.point))
-        # den2 = det((perp(line.direction), perp(prev_line.direction)))
-
-        # assert abs(den1 - den2) < 1e-6, (den1, den2)
-        # assert abs(num1 - num2) < 1e-6, (num1, num2)
-
-        num = num1
-        den = den1
-
+        num = dot(prev_line.direction, line.point - prev_line.point)
+        den = det((line.direction, prev_line.direction))
+        
+        """Comment this while loop to remove relaxation"""
+        while num < 0:
+            print("num: ", num)
+            slack_var += 0.0001
+            num = dot(prev_line.direction, line.point - prev_line.point) + M * slack_var**2
+        
         # Check for zero denominator, since ZeroDivisionError (or rather
         # FloatingPointError) won't necessarily be raised if using numpy.
         if den == 0:
@@ -155,20 +135,3 @@ def normalized(x):
     l = norm_sq(x)
     assert l > 0, (x, l)
     return x / sqrt(l)
-
-if __name__ == '__main__':
-    lines = [
-        Line((-2, 0), (-1, 1)),
-        Line((0, -1), (1, 0))
-    ]
-    point = array((1, 0))
-    result = halfplane_optimize(lines, point)
-    print(result, norm(result))
-
-    # a = point_line_project(lines[0], point, -20, 20)
-    # print((a - lines[0].point)/(-perp(lines[0].direction)))
-    # print(a)
-
-    a = point_line_project(lines[1], point, -10000, -3)
-    # print((a - lines[1].point)/(-perp(lines[1].direction)))
-    print(a)
