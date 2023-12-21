@@ -8,7 +8,7 @@ from numpy import array, sqrt, rint, linspace, pi, cos, sin
 import time
 import random
 import pygame
-
+import do_mpc as mpc
 
 N_AGENTS = 6
 RADIUS = .3
