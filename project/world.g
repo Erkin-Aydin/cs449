@@ -6,6 +6,9 @@ base_5: { X: [3.5, 0.5, 0.0] }
 base_6: { X: [4.5, 2.0, 0.0] }
 base_7: { X: [3.0, 2.5, 0.0] }
 base_8: { X: [1.0, 2.5, 0.0] }
+base_9: { X: [-1.5, 2.5, 0.0] }
+base_10: { X: [-2.0, -3.5, 0.0]}
+base_11: { X: [-2.5, 2.5, 0.0]}
 
 a0 (base_1): {
  joint: transXYPhi, limits: [-20,20,-20,20,-4,4],
@@ -46,6 +49,21 @@ a7 (base_8): {
  joint: transXYPhi, limits: [-20,20,-20,20,-4,4],
  shape: ssCylinder, size: [.1, .3, .02], contact: 1,
  color: [1.0 1.0 1.0]  }
+
+a8 (base_9): {
+ joint: transXYPhi, limits: [-20,20,-20,20,-4,4],
+ shape: ssCylinder, size: [.1, .3, .02], contact: 1,
+ color: [0.5 0.5 0.5]  }
+
+a9 (base_10): {
+ joint: transXYPhi, limits: [-20,20,-20,20,-4,4],
+ shape: ssCylinder, size: [.1, .3, .02], contact: 1,
+ color: [0.75 0.75 0.75]  }
+
+a10 (base_11): {
+ joint: transXYPhi, limits: [-20,20,-20,20,-4,4],
+ shape: ssCylinder, size: [.1, .3, .02], contact: 1,
+ color: [0.0 0.0 0.0]  }
 
 frame floorwalls: { }
 
