@@ -10,7 +10,7 @@ import random
 import pygame
 import do_mpc as mpc
 
-N_AGENTS = 6
+N_AGENTS = 1
 RADIUS = .3
 MAX_SPEED = 0.5
 
@@ -19,8 +19,8 @@ MAX_SPEED = 0.5
 #goal_positions = [(-2.0, -2.0), (-2.0, 2.0), (2.0, 2.0), (2.0, -2.0), (0.0, -3.5), (0.0, 3.5), (-3.5, 0.0), (3.5, 0.0)]
 
 #for 6 agents
-initial_positions = [(2.0, 2.0), (2.0, -2.0), (-2.0, -2.0), (-2.0, 2.0), (0.0, 3.5), (0.0, -3.5)]
-goal_positions = [(-2.0, -2.0), (-2.0, 2.0), (2.0, 2.0), (2.0, -2.0), (0.0, -3.5), (0.0, 3.5)]
+initial_positions = [(-0.5, -3.5), (2.0, -2.5), (3.5, -2.5), (4.5, -1.5), (3.5, 0.5), (4.5, 2.0), (3.0, 2.5), (1.0, 2.5)]
+goal_positions = [(0.5, -2.5), (2.0, -3.5), (4.5, -3.5), (3.5, -1.5), (4.2, -0.2), (3.5, 2.0), (1.0, 3.5), (3.0, 3.5)]
 
 #for 4 agents
 #initial_positions = [(2.0, 2.0), (2.0, -2.0), (-2.0, -2.0), (-2.0, 2.0)]
@@ -56,12 +56,8 @@ C.addFile('world.g')
 C.view()
 qHome = C.getJointState()
 C.setJointState(qHome)
-"""
-for i, agent in enumerate(agents):
-    agent_str = 'a' + str(i)
-    C.setJointState([agent.position[0], agent.position[1], 0], [agent_str])
-"""
-time.sleep(5)
+
+time.sleep(500)
 
 FPS = 20
 dt = 1/FPS
@@ -82,8 +78,6 @@ while running:
         #calculation of the new velocities for the goal positions
         
         for i, agent in enumerate(agents):
-            print("i: ", i)
-            print("agent pos:", agent.position)
             pos_dif = goal_positions[i] - agents[i].position
             magnitude = sqrt(pos_dif[0]**2 + pos_dif[1]**2)
             direction = pos_dif / magnitude
@@ -100,23 +94,8 @@ while running:
             agent_str = 'a' + str(i)
             agent.position = agent.position + agent.velocity * dt
             C.setJointState([agent.position[0] - initial_positions[i][0] ,agent.position[1] - initial_positions[i][1], 0], [agent_str])
-        
-    for line in all_lines[0]:
-        alpha = agents[0].position + line.point + perp(line.direction) * 100
-        beta = agents[0].position + line.point + perp(line.direction) * -100
-        # Update Rai configuration instead of pygame drawing
 
-        gamma = agents[0].position + line.point
-        delta = agents[0].position + line.point + line.direction
-        # Update Rai configuration instead of pygame drawing
-    
     C.view()
-    #TODO
-    #pygame.display.flip()
-    """
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-    """
+
 print('Running simulation')
 

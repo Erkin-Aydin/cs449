@@ -86,8 +86,9 @@ def line_halfplane_intersect(line, other_lines):
         den = det((line.direction, prev_line.direction))
         
         """Comment this while loop to remove relaxation"""
+        
         while num < 0:
-            print("num: ", num)
+            #print("num: ", num)
             slack_var += 0.0001
             num = dot(prev_line.direction, line.point - prev_line.point) + M * slack_var**2
         
