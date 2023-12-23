@@ -10,18 +10,14 @@ import random
 import pygame
 import do_mpc as mpc
 
-N_AGENTS = 1
+N_AGENTS = 8
 RADIUS = .3
-MAX_SPEED = 0.5
+MAX_SPEED = 0.35
 
-#for 8 agents
-#initial_positions = [(2.0, 2.0), (2.0, -2.0), (-2.0, -2.0), (-2.0, 2.0), (0.0, 3.5), (0.0, -3.5), (3.5, 0.0), (-3.5, 0.0)]
-#goal_positions = [(-2.0, -2.0), (-2.0, 2.0), (2.0, 2.0), (2.0, -2.0), (0.0, -3.5), (0.0, 3.5), (-3.5, 0.0), (3.5, 0.0)]
-
-#for 6 agents
-initial_positions = [(-0.5, -3.5), (2.0, -2.5), (3.5, -2.5), (4.5, -1.5), (3.5, 0.5), (4.5, 2.0), (3.0, 2.5), (1.0, 2.5)]
+positions1 = [(-0.5, -3.5), (2.0, -2.5), (3.5, -2.5), (4.5, -1.5), (3.5, 0.5), (4.5, 2.0), (3.0, 2.5), (1.0, 2.5)]
+positions2 = [(0.5, -2.5), (2.0, -3.5), (4.5, -3.5), (3.5, -1.5), (4.2, -0.2), (3.5, 2.0), (1.0, 3.5), (3.0, 3.5)]
 goal_positions = [(0.5, -2.5), (2.0, -3.5), (4.5, -3.5), (3.5, -1.5), (4.2, -0.2), (3.5, 2.0), (1.0, 3.5), (3.0, 3.5)]
-
+isStage1 = [True, True, True, True, True, True, True, True]
 #for 4 agents
 #initial_positions = [(2.0, 2.0), (2.0, -2.0), (-2.0, -2.0), (-2.0, 2.0)]
 #goal_positions = [(-2.0, -2.0), (-2.0, 2.0), (2.0, 2.0), (2.0, -2.0)]
@@ -49,7 +45,7 @@ for i in range(N_AGENTS):
     
     #                   position          initial vel. radius, max speed, preferred vel.
     pref_vel = array(vel)
-    agents.append(Agent(initial_positions[i], vel, .3, MAX_SPEED,  pref_vel))
+    agents.append(Agent(positions1[i], vel, .3, MAX_SPEED,  pref_vel))
 
 C = ry.Config()
 C.addFile('world.g')
@@ -57,7 +53,7 @@ C.view()
 qHome = C.getJointState()
 C.setJointState(qHome)
 
-time.sleep(500)
+time.sleep(5)
 
 FPS = 20
 dt = 1/FPS
@@ -93,7 +89,18 @@ while running:
             agent.velocity = new_vels[i]
             agent_str = 'a' + str(i)
             agent.position = agent.position + agent.velocity * dt
-            C.setJointState([agent.position[0] - initial_positions[i][0] ,agent.position[1] - initial_positions[i][1], 0], [agent_str])
+            print((agent.velocity * dt)[0])
+            print((agent.velocity * dt)[1])
+            C.setJointState([agent.position[0] - positions1[i][0] ,agent.position[1] - positions1[i][1], 0], [agent_str])
+            if -0.001 < (agent.velocity * dt)[0] < 0.001 and -0.001 < (agent.velocity * dt)[1] < 0.001:
+                print("obaa")
+                if isStage1[i]:
+                    isStage1[i] = False
+                    goal_positions[i] = positions1[i]
+                else:
+                    isStage1[i] = True
+                    goal_positions[i] = positions2[i]
+                
 
     C.view()
 
