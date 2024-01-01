@@ -26,6 +26,7 @@ agents = []
 for i in range(N_AGENTS):
 
     vel = 0
+    """
     if(i == 0):
         vel = (-0.55, -0.55)
     elif(i == 1):
@@ -42,9 +43,10 @@ for i in range(N_AGENTS):
         vel = (-0.75, 0.0)
     elif(i == 7):
         vel = (0.75, 0.0)
-    
+    """
     #                   position          initial vel. radius, max speed, preferred vel.
-    pref_vel = array(vel)
+    #pref_vel = array(vel)
+    pref_vel = vel
     agents.append(Agent(positions1[i], vel, .3, MAX_SPEED,  pref_vel))
 
 C = ry.Config()
