@@ -85,13 +85,13 @@ def line_halfplane_intersect(line, other_lines):
         num = dot(prev_line.direction, line.point - prev_line.point)
         den = det((line.direction, prev_line.direction))
         
-        """Comment this while loop to remove relaxation"""
+        """Comment this while loop to remove relaxation
         
         while num < 0:
             #print("num: ", num)
             slack_var += 0.0001
             num = dot(prev_line.direction, line.point - prev_line.point) + M * slack_var**2
-        
+        """
         # Check for zero denominator, since ZeroDivisionError (or rather
         # FloatingPointError) won't necessarily be raised if using numpy.
         if den == 0:

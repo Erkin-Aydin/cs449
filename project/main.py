@@ -1,79 +1,94 @@
 import sys
 sys.path.append('./pyorca/')
 
-import gymnasium as gym
 from robotic import ry
-from pyorca import Agent, get_avoidance_velocity, orca, normalized, perp
-from numpy import array, sqrt, rint, linspace, pi, cos, sin
+from pyorca import Agent, orca
+from numpy import array, sqrt
 import time
-import random
 import pygame
-import do_mpc as mpc
+import numpy as np
 
-N_AGENTS = 11
-RADIUS = .55
-MAX_SPEED = 0.55
+N_AGENTS = 4
+RADIUS = .25
+MAX_SPEED = 0.30
 
-positions1 = [(-0.5, -3.5), (2.0, -2.5), (3.5, -2.5), (4.5, -1.5), (3.5, 0.5), (4.5, 2.0), (3.0, 2.5), (1.0, 2.5), (-1.5, 2.5), (-2.0, -3.5), (-2.5, 2.5)]
-positions2 = [(0.5, -2.5), (2.0, -3.5), (4.5, -3.5), (3.5, -1.5), (4.2, -0.2), (3.5, 2.0), (1.0, 3.5), (3.0, 3.5), (-1.5, -3.5), (-2.0, 2.5), (-2.5, -0.5)]
-goal_positions = [(0.5, -2.5), (2.0, -3.5), (4.5, -3.5), (3.5, -1.5), (4.2, -0.2), (3.5, 2.0), (1.0, 3.5), (3.0, 3.5), (-1.5, -3.5), (-2.0, 2.5), (-2.5, -0.5)]
-isStage1 = [True, True, True, True, True, True, True, True, True, True, True]
-#for 4 agents
-#initial_positions = [(2.0, 2.0), (2.0, -2.0), (-2.0, -2.0), (-2.0, 2.0)]
-#goal_positions = [(-2.0, -2.0), (-2.0, 2.0), (2.0, 2.0), (2.0, -2.0)]
+positions1 = [(0.5, -2.5), (3.5, -3.5), (3.5, 2.5), (4.5, -0.5)]
+positions2 = [(-0.5, -3.5),  (2.5, -2.5), (4.5, 2.5), (3.5, -0.5)]
+goal_positions = [(0.5, -2.5), (3.5, -3.5), (3.5, 2.5), (4.5, -0.5)]
+isStage1 = [True,True,True,True]
 
+"""
+positions1 = [(0.5, -2.5)]
+positions2 = [(-0.5, -3.5)]
+goal_positions = [(0.5, -2.5)]
+isStage1 = [True,True]
+"""
 agents = []
 for i in range(N_AGENTS):
-
-    vel = 0
-    """
-    if(i == 0):
-        vel = (-0.55, -0.55)
-    elif(i == 1):
-        vel = (-0.55, 0.55)
-    elif(i == 2):
-        vel = (0.55, 0.55)
-    elif(i == 3):
-        vel = (0.55, -0.55)
-    elif(i == 4):
-        vel = (0.0, -0.75)
-    elif(i == 5):
-        vel = (0.0, 0.75)
-    elif(i == 6):
-        vel = (-0.75, 0.0)
-    elif(i == 7):
-        vel = (0.75, 0.0)
-    """
-    #                   position          initial vel. radius, max speed, preferred vel.
-    #pref_vel = array(vel)
-    pref_vel = vel
-    agents.append(Agent(positions1[i], vel, .3, MAX_SPEED,  pref_vel))
+    vel = 2
+    pref_vel = array(vel)
+    agents.append(Agent(positions1[i], vel, .3, MAX_SPEED,  vel))
 
 C = ry.Config()
 C.addFile('world.g')
+C.addFile('obstacles.g')
 C.view()
-qHome = C.getJointState()
-C.setJointState(qHome)
 
-time.sleep(5)
+#C2 = ry.Config()
+#C2.addFile('world.g')
+
+
+time.sleep(2)
 
 FPS = 20
 dt = 1/FPS
 tau = 5
-
 clock = pygame.time.Clock()
 running = True
 accum = 0
 all_lines = [[]] * len(agents)
+area_num = 1;
 while running:
-    accum += clock.tick(FPS)
-    time.sleep(0.1)
-    while accum >= dt * 1000:
-        accum -= dt * 1000
+    if(area_num > 4):
+        break
+    qNow = C.getJointState()
+    komo = ry.KOMO(C, 1, 1, 4, True)
+    komo.addControlObjective([], 0, 1e-1)
+    komo.addControlObjective([], 2, 1e0)
+    komo.addObjective([], ry.FS.accumulatedCollisions, [], ry.OT.eq, [1e2])
+    komo.addObjective([1], ry.FS.positionDiff, ['base', 'goal_area' + str(area_num)], ry.OT.eq, [1e2])
+    ret = ry.NLP_Solver(komo.nlp(), verbose=0).solve()
 
+    qT = komo.getPath()[0]
+    i = 0
+    path = 0
+    print("Finding RRT path...")
+    while True:
+        i = i + 1
+        rrt = ry.PathFinder()
+        rrt.setProblem(C, [qNow], [qT])
+        ret = rrt.solve()
+        path = ret.x
+        if hasattr(ret, 'x') and isinstance(ret.x, np.ndarray) and ret.x.ndim == 2 and ret.x.shape[0] > 0:
+            break
+    
+    print("RRT path found!\nCalculating the optimal path using a second KOMO...")
+    komo2 = ry.KOMO(C, 1, path.shape[0], 4, True)
+    komo2.addControlObjective([], 0, 1e-1)
+    komo2.addControlObjective([], 2, 1e0)
+    komo2.addObjective([], ry.FS.accumulatedCollisions, [], ry.OT.eq, [1e2])
+    komo2.addObjective([1], ry.FS.positionDiff, ['base', 'goal_area' + str(area_num)], ry.OT.eq, [1e2])
+    komo2.initWithPath_qOrg(path)
+    print("Optimal path calculated!")
+    ret = ry.NLP_Solver(komo2.nlp(), verbose=0).solve()
+    komoPath = komo2.getPath()
+    min = 20;
+    if min > komoPath.shape[0]:
+        min = komoPath.shape[0]
+    for i in range(0, min):
+        C.setJointState(komoPath[i])
+        
         new_vels = [None] * len(agents)
-
-        #calculation of the new velocities for the goal positions
         
         for i, agent in enumerate(agents):
             pos_dif = goal_positions[i] - agents[i].position
@@ -86,7 +101,7 @@ while running:
         for i, agent in enumerate(agents):
             candidates = agents[:i] + agents[i + 1:]
             new_vels[i], all_lines[i] = orca(agent, candidates, tau, dt)
-
+        
         for i, agent in enumerate(agents):
             agent.velocity = new_vels[i]
             agent_str = 'a' + str(i)
@@ -99,9 +114,17 @@ while running:
                 else:
                     isStage1[i] = True
                     goal_positions[i] = positions2[i]
-                
+                #define a path finding problem
+        
+        C.view(False, f'waypoints{i}')
+
+        time.sleep(0.02)
+    if(min < 4):
+        area_num = area_num + 1
+    accum += clock.tick(FPS)
+    while accum >= dt * 1000:
+        accum -= dt * 1000
 
     C.view()
 
-print('Running simulation')
-
+print('Simulation Done!')
