@@ -10,7 +10,7 @@ import numpy as np
 
 N_AGENTS = 2
 RADIUS = .3
-MAX_SPEED = 0.15
+MAX_SPEED = 0.35
 
 positions1 = [(0.5, -2.5), (1.5, -2.5)]
 positions2 = [(-0.5, -3.5),  (2.5, -2.5)]
@@ -44,7 +44,7 @@ all_lines = [[]] * len(agents)
 while running:
 
     qNow = C.getJointState()
-    komo = ry.KOMO(C, 1, 1, 2, True)
+    komo = ry.KOMO(C, 1, 1, 4, True)
     komo.addControlObjective([], 0, 1e-1)
     komo.addControlObjective([], 2, 1e0)
     komo.addObjective([], ry.FS.accumulatedCollisions, [], ry.OT.eq, [1e2])
@@ -69,16 +69,18 @@ while running:
             break
     
     print("lolololollo")
-    komo2 = ry.KOMO(C, 1, path.shape[0], 2, True)
+    komo2 = ry.KOMO(C, 1, path.shape[0], 4, True)
     komo2.addControlObjective([], 0, 1e-1)
     komo2.addControlObjective([], 2, 1e0)
     komo2.addObjective([], ry.FS.accumulatedCollisions, [], ry.OT.eq, [1e2])
     komo2.addObjective([1], ry.FS.positionDiff, ['base', 'goal_area'], ry.OT.eq, [1e2])
+    komo2.addObjective([1], ry.FS.qItself, ['a0'], ry.OT.eq, [1e2])
+    komo2.addObjective([1], ry.FS.qItself, ['a1'], ry.OT.eq, [1e2])
     komo2.initWithPath_qOrg(path)
     
     ret = ry.NLP_Solver(komo2.nlp(), verbose=0).solve()
     komoPath = komo2.getPath()
-    min = 25;
+    min = 20;
     if min > komoPath.shape[0]:
         min = komoPath.shape[0]
     # display the path for part 1
